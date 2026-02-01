@@ -42,7 +42,7 @@ export function ScanResultView({ result }: ScanResultViewProps) {
       {/* Summary Section */}
       {result.vibe.summary?.one_liner && (
         <section>
-          <p className="font-medium text-2xl md:text-3xl leading-relaxed max-w-3xl">
+          <p className="font-regular text-2xl md:text-3xl leading-relaxed max-w-3xl">
             "{result.vibe.summary.elevator_pitch || result.vibe.summary.one_liner}"
           </p>
           {result.vibe.summary.keywords?.length > 0 && (
