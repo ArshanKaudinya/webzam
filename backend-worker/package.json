@@ -1,0 +1,22 @@
+{
+  "name": "webzam-backend-worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --remote",
+    "dev:local": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply webzam-db --local",
+    "db:migrate:prod": "wrangler d1 migrations apply webzam-db --remote"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "openai": "^4.73.0"
+  },
+  "devDependencies": {
+    "@cloudflare/puppeteer": "^1.0.5",
+    "@cloudflare/workers-types": "^4.20241112.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^4.61.1"
+  }
+}

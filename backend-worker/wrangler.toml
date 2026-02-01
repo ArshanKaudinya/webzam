@@ -1,0 +1,20 @@
+name = "webzam-backend"
+main = "src/index.ts"
+compatibility_date = "2024-11-12"
+compatibility_flags = ["nodejs_compat"]
+
+[browser]
+binding = "BROWSER"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "webzam-db"
+database_id = "bf70b42b-3bf9-4fb5-b220-3a00527c3d86"
+migrations_dir = "migrations"
+
+[vars]
+VIBE_PROVIDER = "openai"
+
+# API keys must be set as secrets
+# Run: wrangler secret put OPENAI_API_KEY
+# Or:  wrangler secret put ANTHROPIC_API_KEY
