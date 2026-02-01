@@ -29,7 +29,7 @@ export default function HistoryPage() {
       {/* Header */}
       <header className="border-b border-black/10">
         <div className="max-w-6xl mx-auto px-8 py-5 flex items-center justify-between">
-          <Link href="/" className="font-serif text-2xl tracking-tight">
+          <Link href="/" className="font-medium text-2xl tracking-tight">
             Webzam
           </Link>
           <nav className="flex items-center gap-6">
@@ -45,7 +45,7 @@ export default function HistoryPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-8 py-16 flex-1 w-full">
-        <h1 className="font-serif text-4xl md:text-5xl tracking-tight mb-12">
+        <h1 className="font-medium text-4xl md:text-5xl tracking-tight mb-12">
           Scan History
         </h1>
 
@@ -97,7 +97,7 @@ export default function HistoryPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-serif text-xl group-hover:underline underline-offset-4">
+                      <p className="font-medium text-xl group-hover:underline underline-offset-4">
                         {hostname}
                       </p>
                       <p className="text-sm text-black/40 mt-1">{scan.url}</p>

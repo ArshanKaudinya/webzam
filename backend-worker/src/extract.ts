@@ -2,7 +2,7 @@ import puppeteer from '@cloudflare/puppeteer';
 import { Env, RawExtractionData, CTACandidate, TypographySample, BackgroundSample, LogoCandidate, VibeSlice } from './types';
 
 const VIEWPORT = { width: 1440, height: 900 };
-const TIMEOUT = 30000;
+const TIMEOUT = 60000;
 
 export async function extractFromUrl(url: string, env: Env): Promise<RawExtractionData> {
   if (!env.BROWSER) {
@@ -15,14 +15,14 @@ export async function extractFromUrl(url: string, env: Env): Promise<RawExtracti
     const page = await browser.newPage();
     await page.setViewport(VIEWPORT);
 
-    // Navigate with timeout
+    // Navigate with networkidle2 (allows 2 ongoing connections - more practical than networkidle0)
     await page.goto(url, {
-      waitUntil: 'networkidle0',
+      waitUntil: 'networkidle2',
       timeout: TIMEOUT
     });
 
-    // Small buffer for dynamic content
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Brief pause for any final rendering
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Extract all data in one evaluate call
     const data = await page.evaluate((viewportHeight: number) => {

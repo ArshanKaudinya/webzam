@@ -36,7 +36,7 @@ export default function ScanDetailPage() {
       {/* Header */}
       <header className="border-b border-black/10">
         <div className="max-w-6xl mx-auto px-8 py-5 flex items-center justify-between">
-          <Link href="/" className="font-serif text-2xl tracking-tight">
+          <Link href="/" className="font-medium text-2xl tracking-tight">
             Webzam
           </Link>
           <nav className="flex items-center gap-6">

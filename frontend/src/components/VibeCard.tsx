@@ -36,7 +36,7 @@ export function VibeCard({ vibe }: VibeCardProps) {
       {vibe.tone?.primary && (
         <Section label="Tone & Voice">
           <div className="flex flex-wrap items-baseline gap-4 mb-4">
-            <span className="font-serif text-3xl">{vibe.tone.primary}</span>
+            <span className="font-medium text-3xl">{vibe.tone.primary}</span>
             {vibe.tone.secondary && (
               <span className="text-black/40">/ {vibe.tone.secondary}</span>
             )}
@@ -81,7 +81,7 @@ export function VibeCard({ vibe }: VibeCardProps) {
       {/* Value Proposition */}
       {vibe.value_proposition?.core_promise && (
         <Section label="Value Proposition">
-          <p className="font-serif text-xl mb-4">{vibe.value_proposition.core_promise}</p>
+          <p className="font-medium text-xl mb-4">{vibe.value_proposition.core_promise}</p>
           {vibe.value_proposition.key_benefits?.length > 0 && (
             <div className="mb-4">
               <p className="text-black/40 text-sm mb-2">Key Benefits</p>
@@ -105,7 +105,7 @@ export function VibeCard({ vibe }: VibeCardProps) {
       {vibe.personality?.archetype && (
         <Section label="Brand Personality">
           <div className="flex items-baseline gap-4 mb-4">
-            <span className="font-serif text-2xl">{vibe.personality.archetype}</span>
+            <span className="font-medium text-2xl">{vibe.personality.archetype}</span>
           </div>
           {vibe.personality.traits?.length > 0 && (
             <div className="mb-4">

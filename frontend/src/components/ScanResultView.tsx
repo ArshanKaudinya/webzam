@@ -24,7 +24,7 @@ export function ScanResultView({ result }: ScanResultViewProps) {
       {/* Header */}
       <div className="border-b border-black/10 pb-8">
         <p className="text-xs uppercase tracking-widest text-black/40 mb-2">Scan Results</p>
-        <h1 className="font-serif text-3xl md:text-4xl mb-3">{hostname}</h1>
+        <h1 className="font-medium text-3xl md:text-4xl mb-3">{hostname}</h1>
         <div className="flex items-center gap-4 text-sm text-black/50">
           <a
             href={result.url}
@@ -42,7 +42,7 @@ export function ScanResultView({ result }: ScanResultViewProps) {
       {/* Summary Section */}
       {result.vibe.summary?.one_liner && (
         <section>
-          <p className="font-serif text-2xl md:text-3xl leading-relaxed max-w-3xl">
+          <p className="font-medium text-2xl md:text-3xl leading-relaxed max-w-3xl">
             "{result.vibe.summary.elevator_pitch || result.vibe.summary.one_liner}"
           </p>
           {result.vibe.summary.keywords?.length > 0 && (
@@ -62,7 +62,7 @@ export function ScanResultView({ result }: ScanResultViewProps) {
 
       {/* Color Palette */}
       <section>
-        <h2 className="font-serif text-2xl mb-8">Color Palette</h2>
+        <h2 className="font-medium text-2xl mb-8">Color Palette</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <ColorChip label="Primary" color={result.colors.primary} />
           <ColorChip label="Secondary" color={result.colors.secondary} />
@@ -72,7 +72,7 @@ export function ScanResultView({ result }: ScanResultViewProps) {
 
       {/* Typography */}
       <section>
-        <h2 className="font-serif text-2xl mb-8">Typography</h2>
+        <h2 className="font-medium text-2xl mb-8">Typography</h2>
         <TypographyPreview
           heading={result.typography.heading}
           body={result.typography.body}
@@ -82,14 +82,14 @@ export function ScanResultView({ result }: ScanResultViewProps) {
       {/* Logo */}
       {result.logo && (
         <section>
-          <h2 className="font-serif text-2xl mb-8">Logo</h2>
+          <h2 className="font-medium text-2xl mb-8">Logo</h2>
           <LogoPreview logo={result.logo} />
         </section>
       )}
 
       {/* Brand Intelligence */}
       <section>
-        <h2 className="font-serif text-2xl mb-8">Brand Intelligence</h2>
+        <h2 className="font-medium text-2xl mb-8">Brand Intelligence</h2>
         <VibeCard vibe={result.vibe} />
       </section>
 

@@ -39,7 +39,7 @@ export default function Home() {
       {/* Header */}
       <header className="border-b border-black/10">
         <div className="max-w-6xl mx-auto px-8 py-5 flex items-center justify-between">
-          <Link href="/" className="font-serif text-2xl tracking-tight">
+          <Link href="/" className="font-medium text-2xl tracking-tight">
             Webzam
           </Link>
           <nav className="flex items-center gap-6">
@@ -65,7 +65,7 @@ export default function Home() {
         {/* Hero */}
         {!result && !loading && (
           <div className="py-24 md:py-32">
-            <h1 className="font-serif text-5xl md:text-7xl tracking-tight mb-6 max-w-4xl">
+            <h1 className="font-regular text-5xl md:text-7xl tracking-tight mb-6 max-w-4xl">
               Design Intelligence Scanner
             </h1>
             <p className="text-lg md:text-xl text-black/60 max-w-2xl mb-12 leading-relaxed">

@@ -1,22 +1,6 @@
 @import "tailwindcss";
 
-/* Custom Fonts */
-@font-face {
-  font-family: 'Instrument Serif';
-  src: url('/fonts/InstrumentSerif-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Instrument Serif';
-  src: url('/fonts/InstrumentSerif-Italic.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-
+/* Clash Grotesk Font */
 @font-face {
   font-family: 'Clash Grotesk';
   src: url('/fonts/ClashGrotesk-Light.otf') format('opentype');
@@ -50,14 +34,12 @@
 }
 
 :root {
-  --font-serif: 'Instrument Serif', Georgia, serif;
   --font-sans: 'Clash Grotesk', system-ui, -apple-system, sans-serif;
 }
 
 @theme inline {
   --color-background: #ffffff;
   --color-foreground: #000000;
-  --font-serif: var(--font-serif);
   --font-sans: var(--font-sans);
 }
 
@@ -68,6 +50,7 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -78,19 +61,11 @@ body {
   line-height: 1.5;
 }
 
-/* Typography */
+/* Headings use medium weight */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  line-height: 1.2;
-}
-
-.font-serif {
-  font-family: var(--font-serif);
-}
-
-.font-sans {
   font-family: var(--font-sans);
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 /* Spinner */
@@ -117,9 +92,4 @@ h1, h2, h3, h4, h5, h6 {
 :focus-visible {
   outline: 2px solid #000;
   outline-offset: 2px;
-}
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
 }
