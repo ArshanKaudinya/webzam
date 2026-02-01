@@ -1,120 +1,133 @@
 import { LogoCandidate, LogoResult } from '../types';
 
-// Parse srcset to get highest resolution URL
-function getHighestResSrc(srcset: string | undefined, src: string | undefined): string | undefined {
-  if (!srcset) return src;
+/**
+ * Parse srcset attribute to get the highest resolution image URL.
+ * Handles both width descriptors (e.g., "800w") and pixel density (e.g., "2x").
+ */
+function getBestImageUrl(srcset: string | undefined, fallbackSrc: string | undefined): string | undefined {
+  if (!srcset) return fallbackSrc;
 
   const entries = srcset.split(',').map(entry => {
-    const parts = entry.trim().split(/\s+/);
-    const url = parts[0];
-    const descriptor = parts[1] || '1x';
+    const [url, descriptor = '1x'] = entry.trim().split(/\s+/);
 
-    // Parse width descriptor (e.g., "800w") or pixel density (e.g., "2x")
-    let width = 0;
+    let priority = 0;
     if (descriptor.endsWith('w')) {
-      width = parseInt(descriptor);
+      priority = parseInt(descriptor);
     } else if (descriptor.endsWith('x')) {
-      width = parseFloat(descriptor) * 100; // Normalize density to comparable scale
+      priority = parseFloat(descriptor) * 1000;
     }
 
-    return { url, width };
+    return { url, priority };
   });
 
-  // Sort by width descending and take first
-  entries.sort((a, b) => b.width - a.width);
-  return entries[0]?.url || src;
+  entries.sort((a, b) => b.priority - a.priority);
+  return entries[0]?.url || fallbackSrc;
 }
 
-// Determine image type from URL
-function getImageType(url: string): 'png' | 'jpg' | 'svg' | 'unknown' {
-  const lower = url.toLowerCase();
-  if (lower.includes('.svg')) return 'svg';
-  if (lower.includes('.png')) return 'png';
-  if (lower.includes('.jpg') || lower.includes('.jpeg')) return 'jpg';
+/**
+ * Determine image format from URL path.
+ */
+function getImageFormat(url: string): 'svg' | 'png' | 'jpg' | 'unknown' {
+  const path = url.toLowerCase().split('?')[0];
+  if (path.endsWith('.svg')) return 'svg';
+  if (path.endsWith('.png')) return 'png';
+  if (path.endsWith('.jpg') || path.endsWith('.jpeg')) return 'jpg';
   return 'unknown';
 }
 
+/**
+ * Convert a relative URL to absolute using the page URL as base.
+ */
+function resolveUrl(src: string, pageUrl: string): string {
+  if (src.startsWith('http://') || src.startsWith('https://')) {
+    return src;
+  }
+
+  try {
+    return new URL(src, pageUrl).href;
+  } catch {
+    return src;
+  }
+}
+
+/**
+ * Score a logo candidate based on various heuristics.
+ * Higher score = more likely to be the main logo.
+ */
+function scoreCandidate(candidate: LogoCandidate): number {
+  let score = 0;
+
+  // Location: header/nav is primary logo placement
+  if (candidate.inHeader) score += 10;
+
+  // Format: SVGs are preferred for logos (scalable, crisp)
+  if (candidate.type === 'svg') score += 5;
+
+  // Alt text: logo-related keywords indicate intentional logo markup
+  if (candidate.alt && /logo|brand|company/i.test(candidate.alt)) score += 3;
+
+  // Size: reasonable dimensions for a logo (not icons, not hero images)
+  const area = candidate.rect.width * candidate.rect.height;
+  if (area > 500 && area < 50000) score += 2;
+
+  // Position: top-left corner is typical logo placement
+  if (candidate.rect.x < 200 && candidate.rect.y < 150) score += 2;
+
+  return score;
+}
+
+/**
+ * Analyze logo candidates and return the best match.
+ *
+ * Returns a LogoResult where:
+ * - type: indicates the image format (svg, png, jpg, unknown)
+ * - value: either inline SVG markup (for <svg> elements) or a URL (for <img> elements)
+ */
 export function analyzeLogo(candidates: LogoCandidate[], pageUrl: string): LogoResult | null {
   if (candidates.length === 0) {
     return null;
   }
 
-  // Sort candidates by priority:
-  // 1. SVGs in header
-  // 2. Images in header with logo-related alt text
-  // 3. Other header images
-  // 4. Non-header candidates
-  const scored = candidates.map(c => {
-    let score = 0;
-
-    // Header location bonus
-    if (c.inHeader) score += 10;
-
-    // SVG bonus (preferred)
-    if (c.type === 'svg') score += 5;
-
-    // Logo-related alt text bonus
-    if (c.alt && /logo|brand/i.test(c.alt)) score += 3;
-
-    // Reasonable size bonus (not too tiny, not too large)
-    const area = c.rect.width * c.rect.height;
-    if (area > 500 && area < 50000) score += 2;
-
-    // Top-left position bonus (where logos typically are)
-    if (c.rect.x < 200 && c.rect.y < 150) score += 2;
-
-    return { candidate: c, score };
-  });
-
-  scored.sort((a, b) => b.score - a.score);
+  // Score and sort candidates
+  const scored = candidates
+    .map(candidate => ({ candidate, score: scoreCandidate(candidate) }))
+    .sort((a, b) => b.score - a.score);
 
   const best = scored[0];
+
+  // Require minimum confidence threshold
   if (!best || best.score < 5) {
     return null;
   }
 
-  const c = best.candidate;
+  const { candidate } = best;
+  const confidence = Math.min(best.score / 15, 1);
 
-  if (c.type === 'svg' && c.svgContent) {
+  // Inline SVG: return the actual SVG markup
+  if (candidate.type === 'svg' && candidate.svgContent) {
     return {
       type: 'svg',
-      value: c.svgContent,
-      confidence: Math.min(best.score / 15, 1),
-      reason: c.inHeader ? 'SVG found in header/nav' : 'SVG found near top of page'
+      value: candidate.svgContent,
+      confidence,
+      reason: candidate.inHeader ? 'SVG in header' : 'SVG near top of page'
     };
   }
 
-  // For images, resolve the best URL
-  const resolvedSrc = getHighestResSrc(c.srcset, c.src);
-  if (!resolvedSrc) {
+  // Image element: return the resolved URL
+  const imageUrl = getBestImageUrl(candidate.srcset, candidate.src);
+  if (!imageUrl) {
     return null;
   }
 
-  // Make URL absolute if needed
-  let absoluteUrl = resolvedSrc;
-  if (resolvedSrc.startsWith('/')) {
-    try {
-      const base = new URL(pageUrl);
-      absoluteUrl = `${base.origin}${resolvedSrc}`;
-    } catch {
-      // Keep relative URL if parsing fails
-    }
-  } else if (!resolvedSrc.startsWith('http')) {
-    try {
-      absoluteUrl = new URL(resolvedSrc, pageUrl).href;
-    } catch {
-      // Keep as-is
-    }
-  }
-
-  const imgType = getImageType(absoluteUrl);
+  const absoluteUrl = resolveUrl(imageUrl, pageUrl);
+  const format = getImageFormat(absoluteUrl);
 
   return {
-    type: imgType,
+    type: format,
     value: absoluteUrl,
-    confidence: Math.min(best.score / 15, 1),
-    reason: c.inHeader
-      ? `Image found in header${c.alt ? ` with alt="${c.alt}"` : ''}`
-      : 'Image found near top of page'
+    confidence,
+    reason: candidate.inHeader
+      ? `Image in header${candidate.alt ? ` (${candidate.alt})` : ''}`
+      : 'Image near top of page'
   };
 }
