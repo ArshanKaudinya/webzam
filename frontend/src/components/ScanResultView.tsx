@@ -5,35 +5,65 @@ import { ColorChip } from './ColorChip';
 import { TypographyPreview } from './TypographyPreview';
 import { LogoPreview } from './LogoPreview';
 import { VibeCard } from './VibeCard';
-import { EvidencePanel } from './EvidencePanel';
 
 interface ScanResultViewProps {
   result: ScanResult;
 }
 
 export function ScanResultView({ result }: ScanResultViewProps) {
+  const hostname = (() => {
+    try {
+      return new URL(result.url).hostname;
+    } catch {
+      return result.url;
+    }
+  })();
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-20">
       {/* Header */}
-      <div className="border-b border-neutral-200 pb-6">
-        <h1 className="text-2xl font-semibold">Scan Results</h1>
-        <a
-          href={result.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline text-sm"
-        >
-          {result.url}
-        </a>
-        <p className="text-sm text-neutral-400 mt-1">
-          Scanned {new Date(result.scannedAt).toLocaleString()}
-        </p>
+      <div className="border-b border-black/10 pb-8">
+        <p className="text-xs uppercase tracking-widest text-black/40 mb-2">Scan Results</p>
+        <h1 className="font-serif text-3xl md:text-4xl mb-3">{hostname}</h1>
+        <div className="flex items-center gap-4 text-sm text-black/50">
+          <a
+            href={result.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline underline-offset-2"
+          >
+            {result.url}
+          </a>
+          <span>·</span>
+          <span>{new Date(result.scannedAt).toLocaleDateString()}</span>
+        </div>
       </div>
 
-      {/* Colors */}
+      {/* Summary Section */}
+      {result.vibe.summary?.one_liner && (
+        <section>
+          <p className="font-serif text-2xl md:text-3xl leading-relaxed max-w-3xl">
+            "{result.vibe.summary.elevator_pitch || result.vibe.summary.one_liner}"
+          </p>
+          {result.vibe.summary.keywords?.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-6">
+              {result.vibe.summary.keywords.map((keyword, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 text-xs uppercase tracking-wider border border-black/20"
+                >
+                  {keyword}
+                </span>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Color Palette */}
       <section>
-        <h2 className="text-lg font-semibold mb-4">Color Palette</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <h2 className="font-serif text-2xl mb-8">Color Palette</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <ColorChip label="Primary" color={result.colors.primary} />
           <ColorChip label="Secondary" color={result.colors.secondary} />
           <ColorChip label="Background" color={result.colors.background} />
@@ -42,7 +72,7 @@ export function ScanResultView({ result }: ScanResultViewProps) {
 
       {/* Typography */}
       <section>
-        <h2 className="text-lg font-semibold mb-4">Typography</h2>
+        <h2 className="font-serif text-2xl mb-8">Typography</h2>
         <TypographyPreview
           heading={result.typography.heading}
           body={result.typography.body}
@@ -50,53 +80,51 @@ export function ScanResultView({ result }: ScanResultViewProps) {
       </section>
 
       {/* Logo */}
-      <section>
-        <h2 className="text-lg font-semibold mb-4">Logo</h2>
-        <LogoPreview logo={result.logo} />
-      </section>
-
-      {/* Vibe */}
-      <section>
-        <VibeCard vibe={result.vibe} />
-      </section>
-
-      {/* Vibe Slice (Debug) */}
-      {result.vibeSlice && (
-        <section className="p-4 rounded-lg bg-neutral-50 border border-neutral-200">
-          <h3 className="text-sm font-medium text-neutral-500 mb-2">Extracted Content Slice</h3>
-          <dl className="grid gap-2 text-sm">
-            {result.vibeSlice.heroH1 && (
-              <>
-                <dt className="text-neutral-400">Hero H1</dt>
-                <dd className="text-neutral-700">{result.vibeSlice.heroH1}</dd>
-              </>
-            )}
-            {result.vibeSlice.heroSubheading && (
-              <>
-                <dt className="text-neutral-400">Subheading</dt>
-                <dd className="text-neutral-700">{result.vibeSlice.heroSubheading}</dd>
-              </>
-            )}
-            {result.vibeSlice.primaryCTA && (
-              <>
-                <dt className="text-neutral-400">Primary CTA</dt>
-                <dd className="text-neutral-700">{result.vibeSlice.primaryCTA}</dd>
-              </>
-            )}
-            {result.vibeSlice.navLabels.length > 0 && (
-              <>
-                <dt className="text-neutral-400">Navigation</dt>
-                <dd className="text-neutral-700">{result.vibeSlice.navLabels.join(' · ')}</dd>
-              </>
-            )}
-          </dl>
+      {result.logo && (
+        <section>
+          <h2 className="font-serif text-2xl mb-8">Logo</h2>
+          <LogoPreview logo={result.logo} />
         </section>
       )}
 
-      {/* Evidence */}
-      <section className="border-t border-neutral-200 pt-8">
-        <EvidencePanel colors={result.colors} typography={result.typography} />
+      {/* Brand Intelligence */}
+      <section>
+        <h2 className="font-serif text-2xl mb-8">Brand Intelligence</h2>
+        <VibeCard vibe={result.vibe} />
       </section>
+
+      {/* Raw Content */}
+      {result.vibeSlice && (result.vibeSlice.heroH1 || result.vibeSlice.navLabels.length > 0) && (
+        <section className="border-t border-black/10 pt-12">
+          <p className="text-xs uppercase tracking-widest text-black/40 mb-6">Extracted Content</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+            {result.vibeSlice.heroH1 && (
+              <div>
+                <p className="text-black/40 mb-1">Hero Headline</p>
+                <p>{result.vibeSlice.heroH1}</p>
+              </div>
+            )}
+            {result.vibeSlice.heroSubheading && (
+              <div>
+                <p className="text-black/40 mb-1">Subheading</p>
+                <p>{result.vibeSlice.heroSubheading}</p>
+              </div>
+            )}
+            {result.vibeSlice.primaryCTA && (
+              <div>
+                <p className="text-black/40 mb-1">Primary CTA</p>
+                <p>{result.vibeSlice.primaryCTA}</p>
+              </div>
+            )}
+            {result.vibeSlice.navLabels.length > 0 && (
+              <div>
+                <p className="text-black/40 mb-1">Navigation</p>
+                <p>{result.vibeSlice.navLabels.join(' · ')}</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

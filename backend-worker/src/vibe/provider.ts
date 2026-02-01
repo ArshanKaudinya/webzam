@@ -1,42 +1,159 @@
 import { VibeSlice, VibeResult } from '../types';
 
-const VIBE_PROMPT = `Analyze this website content and extract brand vibe information. Return ONLY valid JSON matching this schema:
+const VIBE_PROMPT = `You are a brand strategist and design analyst. Analyze this website's content deeply and extract comprehensive brand intelligence.
+
+## Website Content Extracted:
+
+**Page Title:** {pageTitle}
+
+**Meta Description:** {metaDescription}
+
+**Hero Headline:** {heroH1}
+
+**Subheading/Tagline:** {heroSubheading}
+
+**Primary Call-to-Action:** {primaryCTA}
+
+**All CTA Buttons:** {ctaTexts}
+
+**Navigation Labels:** {navLabels}
+
+**All Page Headings:**
+{allHeadings}
+
+**Feature Descriptions:**
+{featureDescriptions}
+
+**Testimonials/Reviews:**
+{testimonials}
+
+**Social Proof (Clients/Stats):**
+{socialProof}
+
+**Pricing Information:**
+{pricingHints}
+
+**Footer Links:** {footerLinks}
+
+---
+
+## Your Analysis Task:
+
+Provide a thorough brand analysis covering these dimensions:
+
+### 1. Brand Voice & Tone
+- What is the primary emotional tone? (e.g., authoritative, friendly, provocative, aspirational)
+- What communication style do they use? (formal/informal, technical/accessible, direct/subtle)
+- What personality traits come through?
+
+### 2. Target Audience
+- Who is the primary audience? Be specific about demographics, psychographics, and needs
+- What pain points or desires does this brand address?
+- What level of sophistication/expertise does the audience have?
+
+### 3. Value Proposition & Positioning
+- What unique value does this brand offer?
+- How do they differentiate from competitors?
+- What transformation or outcome do they promise?
+
+### 4. Brand Personality
+- If this brand were a person, describe their personality
+- What archetype fits? (e.g., The Innovator, The Sage, The Hero, The Creator)
+
+### 5. Visual & Aesthetic Language
+- What design philosophy is evident? (minimalist, bold, playful, premium, etc.)
+- What era or movement does it reference?
+- What mood does it create?
+
+### 6. Industry & Market Position
+- What industry/sector is this?
+- Is this B2B or B2C?
+- What price tier does this suggest? (budget, mid-market, premium, luxury)
+
+---
+
+## Response Format (JSON only):
 
 {
-  "tone": "string describing the overall tone (e.g., 'professional', 'playful', 'innovative')",
-  "audience": ["array of target audience segments"],
-  "positioning": "one sentence describing the brand positioning",
-  "aesthetic_style": ["array of aesthetic descriptors like 'minimalist', 'bold', 'tech-forward'"],
-  "summary": "2-3 sentence brand summary"
+  "tone": {
+    "primary": "single word primary tone",
+    "secondary": "single word secondary tone",
+    "voice_characteristics": ["list", "of", "3-5", "voice", "traits"]
+  },
+  "audience": {
+    "primary_segment": "specific description of main audience",
+    "demographics": "age range, profession, location hints",
+    "psychographics": "values, interests, lifestyle",
+    "sophistication_level": "novice | intermediate | expert | mixed"
+  },
+  "value_proposition": {
+    "core_promise": "one sentence value prop",
+    "key_benefits": ["benefit 1", "benefit 2", "benefit 3"],
+    "differentiator": "what makes them unique"
+  },
+  "personality": {
+    "archetype": "brand archetype name",
+    "traits": ["trait1", "trait2", "trait3", "trait4", "trait5"],
+    "human_description": "2-3 sentence description if brand were a person"
+  },
+  "aesthetic": {
+    "style": ["list", "of", "aesthetic", "descriptors"],
+    "mood": "emotional mood created",
+    "design_era": "modern/retro/timeless/futuristic",
+    "polish_level": "startup | established | enterprise | premium"
+  },
+  "market": {
+    "industry": "industry name",
+    "business_model": "B2B | B2C | B2B2C | Marketplace",
+    "price_tier": "budget | mid-market | premium | luxury",
+    "competitive_position": "challenger | leader | niche | disruptor"
+  },
+  "summary": {
+    "one_liner": "single sentence brand summary",
+    "elevator_pitch": "2-3 sentence pitch capturing essence",
+    "keywords": ["5-8", "keywords", "that", "define", "this", "brand"]
+  }
 }
 
-Website content:
-Hero headline: {heroH1}
-Subheading: {heroSubheading}
-Primary CTA: {primaryCTA}
-Navigation: {navLabels}
-
-Respond with ONLY the JSON object, no markdown or explanation.`;
+Respond with ONLY the JSON object. No markdown, no explanation, no preamble.`;
 
 function buildPrompt(slice: VibeSlice): string {
+  const formatList = (items: string[] | undefined, fallback = 'Not found'): string => {
+    if (!items || items.length === 0) return fallback;
+    return items.map(item => `- ${item}`).join('\n');
+  };
+
+  const formatInline = (items: string[] | undefined, fallback = 'Not found'): string => {
+    if (!items || items.length === 0) return fallback;
+    return items.join(', ');
+  };
+
   return VIBE_PROMPT
+    .replace('{pageTitle}', slice.pageTitle || 'Not found')
+    .replace('{metaDescription}', slice.metaDescription || 'Not found')
     .replace('{heroH1}', slice.heroH1 || 'Not found')
     .replace('{heroSubheading}', slice.heroSubheading || 'Not found')
     .replace('{primaryCTA}', slice.primaryCTA || 'Not found')
-    .replace('{navLabels}', slice.navLabels.join(', ') || 'Not found');
+    .replace('{ctaTexts}', formatInline(slice.ctaTexts))
+    .replace('{navLabels}', formatInline(slice.navLabels))
+    .replace('{allHeadings}', formatList(slice.allHeadings))
+    .replace('{featureDescriptions}', formatList(slice.featureDescriptions))
+    .replace('{testimonials}', formatList(slice.testimonials))
+    .replace('{socialProof}', formatList(slice.socialProof))
+    .replace('{pricingHints}', formatList(slice.pricingHints))
+    .replace('{footerLinks}', formatInline(slice.footerLinks));
 }
 
-function parseVibeResponse(text: string): Partial<VibeResult> {
+function parseVibeResponse(text: string): any {
   try {
-    // Try to extract JSON from the response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
-  } catch {
-    // Parsing failed
+  } catch (e) {
+    console.error('Failed to parse vibe response:', e);
   }
-  return {};
+  return null;
 }
 
 export async function analyzeVibe(
@@ -46,22 +163,27 @@ export async function analyzeVibe(
   openaiKey: string | undefined
 ): Promise<VibeResult> {
 
-  // Check if we have a valid provider and key
+  const emptyResult: VibeResult = {
+    tone: { primary: '', secondary: '', voice_characteristics: [] },
+    audience: { primary_segment: '', demographics: '', psychographics: '', sophistication_level: '' },
+    value_proposition: { core_promise: '', key_benefits: [], differentiator: '' },
+    personality: { archetype: '', traits: [], human_description: '' },
+    aesthetic: { style: [], mood: '', design_era: '', polish_level: '' },
+    market: { industry: '', business_model: '', price_tier: '', competitive_position: '' },
+    summary: { one_liner: '', elevator_pitch: '', keywords: [] },
+    confidence: 0,
+    provider: 'none'
+  };
+
   if (!provider || provider === 'none') {
-    return {
-      tone: '',
-      audience: [],
-      positioning: '',
-      aesthetic_style: [],
-      summary: '',
-      confidence: 0,
-      provider: 'none'
-    };
+    return emptyResult;
   }
 
   const prompt = buildPrompt(slice);
 
   try {
+    let responseText = '';
+
     if (provider === 'anthropic' && anthropicKey) {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -71,8 +193,8 @@ export async function analyzeVibe(
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-3-haiku-20240307',
-          max_tokens: 500,
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 4000,
           messages: [{ role: 'user', content: prompt }]
         })
       });
@@ -82,21 +204,8 @@ export async function analyzeVibe(
       }
 
       const data = await response.json() as { content: Array<{ text: string }> };
-      const text = data.content?.[0]?.text || '';
-      const parsed = parseVibeResponse(text);
-
-      return {
-        tone: parsed.tone || '',
-        audience: parsed.audience || [],
-        positioning: parsed.positioning || '',
-        aesthetic_style: parsed.aesthetic_style || [],
-        summary: parsed.summary || '',
-        confidence: parsed.tone ? 0.8 : 0.3,
-        provider: 'anthropic'
-      };
-    }
-
-    if (provider === 'openai' && openaiKey) {
+      responseText = data.content?.[0]?.text || '';
+    } else if (provider === 'openai' && openaiKey) {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -105,7 +214,7 @@ export async function analyzeVibe(
         },
         body: JSON.stringify({
           model: 'gpt-4o-mini',
-          max_tokens: 500,
+          max_tokens: 4000,
           messages: [{ role: 'user', content: prompt }]
         })
       });
@@ -115,31 +224,31 @@ export async function analyzeVibe(
       }
 
       const data = await response.json() as { choices: Array<{ message: { content: string } }> };
-      const text = data.choices?.[0]?.message?.content || '';
-      const parsed = parseVibeResponse(text);
-
-      return {
-        tone: parsed.tone || '',
-        audience: parsed.audience || [],
-        positioning: parsed.positioning || '',
-        aesthetic_style: parsed.aesthetic_style || [],
-        summary: parsed.summary || '',
-        confidence: parsed.tone ? 0.8 : 0.3,
-        provider: 'openai'
-      };
+      responseText = data.choices?.[0]?.message?.content || '';
+    } else {
+      return emptyResult;
     }
+
+    const parsed = parseVibeResponse(responseText);
+
+    if (!parsed) {
+      return { ...emptyResult, provider };
+    }
+
+    return {
+      tone: parsed.tone || emptyResult.tone,
+      audience: parsed.audience || emptyResult.audience,
+      value_proposition: parsed.value_proposition || emptyResult.value_proposition,
+      personality: parsed.personality || emptyResult.personality,
+      aesthetic: parsed.aesthetic || emptyResult.aesthetic,
+      market: parsed.market || emptyResult.market,
+      summary: parsed.summary || emptyResult.summary,
+      confidence: parsed.tone?.primary ? 0.85 : 0.4,
+      provider
+    };
+
   } catch (err) {
     console.error('Vibe analysis error:', err);
+    return { ...emptyResult, provider };
   }
-
-  // Fallback if provider is set but key is missing or API failed
-  return {
-    tone: '',
-    audience: [],
-    positioning: '',
-    aesthetic_style: [],
-    summary: '',
-    confidence: 0,
-    provider: 'none'
-  };
 }

@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { LogoResult } from '@/lib/types';
 
 interface LogoPreviewProps {
@@ -5,9 +8,12 @@ interface LogoPreviewProps {
 }
 
 export function LogoPreview({ logo }: LogoPreviewProps) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   if (!logo) {
     return (
-      <div className="p-6 rounded-lg border border-neutral-200 bg-neutral-50 text-center text-neutral-400">
+      <div className="p-12 border border-black/10 text-center text-black/30">
         No logo detected
       </div>
     );
@@ -16,41 +22,58 @@ export function LogoPreview({ logo }: LogoPreviewProps) {
   const isSvg = logo.type === 'svg';
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-neutral-500 uppercase tracking-wide">Logo</span>
-        <span className="text-xs text-neutral-400">
-          {Math.round(logo.confidence * 100)}% confidence
-        </span>
-      </div>
-
-      <div className="p-6 rounded-lg border border-neutral-200 bg-white flex items-center justify-center min-h-[100px]">
+    <div>
+      <div className="p-12 border border-black/10 flex items-center justify-center bg-white min-h-[180px]">
         {isSvg ? (
           <div
-            className="max-w-[200px] max-h-[100px]"
+            className="max-w-[240px] max-h-[120px] [&_svg]:max-w-full [&_svg]:max-h-[120px]"
             dangerouslySetInnerHTML={{ __html: logo.value }}
           />
+        ) : imageError ? (
+          <div className="text-center">
+            <p className="text-black/40 text-sm mb-2">Image could not be loaded</p>
+            <a
+              href={logo.value}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs uppercase tracking-wider hover:underline underline-offset-2"
+            >
+              Open in new tab →
+            </a>
+          </div>
         ) : (
-          <img
-            src={logo.value}
-            alt="Logo"
-            className="max-w-[200px] max-h-[100px] object-contain"
-          />
+          <>
+            {!imageLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+              </div>
+            )}
+            <img
+              src={logo.value}
+              alt="Logo"
+              className={`max-w-[240px] max-h-[120px] object-contain transition-opacity ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+              crossOrigin="anonymous"
+            />
+          </>
         )}
       </div>
-
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-neutral-500">{logo.reason}</span>
-        {!isSvg && (
-          <a
-            href={logo.value}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
-          >
-            Download {logo.type.toUpperCase()}
-          </a>
-        )}
+      <div className="mt-3 flex items-center justify-between text-sm">
+        <span className="text-black/40">{logo.reason}</span>
+        <div className="flex items-center gap-4">
+          <span className="text-xs text-black/40">{Math.round(logo.confidence * 100)}%</span>
+          {!isSvg && (
+            <a
+              href={logo.value}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs uppercase tracking-wider hover:underline underline-offset-2"
+            >
+              View Original
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

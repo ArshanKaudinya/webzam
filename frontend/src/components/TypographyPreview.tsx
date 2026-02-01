@@ -7,23 +7,21 @@ interface TypographyPreviewProps {
 
 export function TypographyPreview({ heading, body }: TypographyPreviewProps) {
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-neutral-500 uppercase tracking-wide">Heading Font</span>
-          <span className="text-xs text-neutral-400">
-            {Math.round(heading.confidence * 100)}% confidence
-          </span>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs uppercase tracking-widest text-black/40">Heading Font</p>
+          <span className="text-xs text-black/40">{Math.round(heading.confidence * 100)}%</span>
         </div>
-        <div className="p-4 rounded-lg border border-neutral-200 bg-neutral-50">
+        <div className="p-6 border border-black/10">
           <p
-            className="text-2xl font-semibold"
+            className="text-2xl mb-3"
             style={{ fontFamily: heading.fontFamily }}
           >
-            {heading.fontFamily}
+            {heading.fontFamily.split(',')[0].replace(/['"]/g, '')}
           </p>
           <p
-            className="text-lg mt-2 text-neutral-600"
+            className="text-lg text-black/60"
             style={{ fontFamily: heading.fontFamily }}
           >
             The quick brown fox jumps over the lazy dog
@@ -32,21 +30,19 @@ export function TypographyPreview({ heading, body }: TypographyPreviewProps) {
       </div>
 
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-neutral-500 uppercase tracking-wide">Body Font</span>
-          <span className="text-xs text-neutral-400">
-            {Math.round(body.confidence * 100)}% confidence
-          </span>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs uppercase tracking-widest text-black/40">Body Font</p>
+          <span className="text-xs text-black/40">{Math.round(body.confidence * 100)}%</span>
         </div>
-        <div className="p-4 rounded-lg border border-neutral-200 bg-neutral-50">
+        <div className="p-6 border border-black/10">
           <p
-            className="text-base"
+            className="text-base mb-3"
             style={{ fontFamily: body.fontFamily }}
           >
-            {body.fontFamily}
+            {body.fontFamily.split(',')[0].replace(/['"]/g, '')}
           </p>
           <p
-            className="text-sm mt-2 text-neutral-600"
+            className="text-sm text-black/60 leading-relaxed"
             style={{ fontFamily: body.fontFamily }}
           >
             The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.

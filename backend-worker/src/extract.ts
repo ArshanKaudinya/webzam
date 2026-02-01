@@ -36,7 +36,16 @@ export async function extractFromUrl(url: string, env: Env): Promise<RawExtracti
           heroH1: null,
           heroSubheading: null,
           primaryCTA: null,
-          navLabels: []
+          navLabels: [],
+          metaDescription: null,
+          pageTitle: null,
+          allHeadings: [],
+          featureDescriptions: [],
+          testimonials: [],
+          footerLinks: [],
+          socialProof: [],
+          pricingHints: [],
+          ctaTexts: []
         }
       };
 
@@ -191,7 +200,16 @@ export async function extractFromUrl(url: string, env: Env): Promise<RawExtracti
         });
       });
 
-      // Extract vibe slice
+      // Extract vibe slice - comprehensive content extraction
+
+      // Page title and meta description
+      result.vibeSlice.pageTitle = document.title || null;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        result.vibeSlice.metaDescription = metaDesc.getAttribute('content')?.slice(0, 500) || null;
+      }
+
+      // Hero content
       const h1 = document.querySelector('h1');
       if (h1) {
         result.vibeSlice.heroH1 = (h1.textContent || '').trim().slice(0, 200);
@@ -202,6 +220,74 @@ export async function extractFromUrl(url: string, env: Env): Promise<RawExtracti
           result.vibeSlice.heroSubheading = (nextP.textContent || '').trim().slice(0, 300);
         }
       }
+
+      // All headings for context
+      const allHeadings: string[] = [];
+      document.querySelectorAll('h1, h2, h3').forEach(el => {
+        const text = (el.textContent || '').trim();
+        if (text && text.length > 3 && text.length < 150 && allHeadings.length < 15) {
+          allHeadings.push(text);
+        }
+      });
+      result.vibeSlice.allHeadings = allHeadings;
+
+      // Feature descriptions - paragraphs in sections
+      const featureDescriptions: string[] = [];
+      document.querySelectorAll('section p, [class*="feature"] p, [class*="benefit"] p, main p').forEach(el => {
+        const text = (el.textContent || '').trim();
+        if (text.length > 40 && text.length < 400 && featureDescriptions.length < 10) {
+          featureDescriptions.push(text);
+        }
+      });
+      result.vibeSlice.featureDescriptions = featureDescriptions;
+
+      // Testimonials
+      const testimonials: string[] = [];
+      document.querySelectorAll('[class*="testimonial"], [class*="review"], [class*="quote"], blockquote').forEach(el => {
+        const text = (el.textContent || '').trim();
+        if (text.length > 20 && text.length < 500 && testimonials.length < 5) {
+          testimonials.push(text);
+        }
+      });
+      result.vibeSlice.testimonials = testimonials;
+
+      // Social proof - customer logos, stats, badges
+      const socialProof: string[] = [];
+      document.querySelectorAll('[class*="logo"] img, [class*="client"] img, [class*="partner"] img').forEach(el => {
+        const alt = (el as HTMLImageElement).alt;
+        if (alt && alt.length > 2 && socialProof.length < 10) {
+          socialProof.push(alt);
+        }
+      });
+      // Stats and numbers
+      document.querySelectorAll('[class*="stat"], [class*="metric"], [class*="number"]').forEach(el => {
+        const text = (el.textContent || '').trim();
+        if (text.length > 2 && text.length < 100 && socialProof.length < 15) {
+          socialProof.push(text);
+        }
+      });
+      result.vibeSlice.socialProof = socialProof;
+
+      // Pricing hints
+      const pricingHints: string[] = [];
+      document.querySelectorAll('[class*="price"], [class*="plan"], [class*="tier"]').forEach(el => {
+        const text = (el.textContent || '').trim();
+        if (text.length > 3 && text.length < 200 && pricingHints.length < 8) {
+          pricingHints.push(text);
+        }
+      });
+      result.vibeSlice.pricingHints = pricingHints;
+
+      // All CTA texts
+      const ctaTexts: string[] = [];
+      result.ctaCandidates.forEach(cta => {
+        if (cta.text && cta.text.length > 1 && cta.text.length < 50 && ctaTexts.length < 10) {
+          if (!ctaTexts.includes(cta.text)) {
+            ctaTexts.push(cta.text);
+          }
+        }
+      });
+      result.vibeSlice.ctaTexts = ctaTexts;
 
       // Primary CTA - first prominent button above fold
       const primaryCta = result.ctaCandidates
@@ -221,6 +307,16 @@ export async function extractFromUrl(url: string, env: Env): Promise<RawExtracti
         }
       });
       result.vibeSlice.navLabels = navLabels;
+
+      // Footer links for additional context
+      const footerLinks: string[] = [];
+      document.querySelectorAll('footer a').forEach(el => {
+        const text = (el.textContent || '').trim();
+        if (text && text.length > 1 && text.length < 40 && footerLinks.length < 15) {
+          footerLinks.push(text);
+        }
+      });
+      result.vibeSlice.footerLinks = footerLinks;
 
       return result;
     }, VIEWPORT.height);

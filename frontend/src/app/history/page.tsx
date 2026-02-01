@@ -25,49 +25,52 @@ export default function HistoryPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <header className="border-b border-neutral-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-semibold tracking-tight">
+      <header className="border-b border-black/10">
+        <div className="max-w-6xl mx-auto px-8 py-5 flex items-center justify-between">
+          <Link href="/" className="font-serif text-2xl tracking-tight">
             Webzam
           </Link>
-          <Link
-            href="/history"
-            className="text-sm text-neutral-900 font-medium"
-          >
-            History
-          </Link>
+          <nav className="flex items-center gap-6">
+            <Link
+              href="/"
+              className="text-sm tracking-wide uppercase hover:underline underline-offset-4"
+            >
+              New Scan
+            </Link>
+            <span className="text-sm tracking-wide uppercase text-black/40">History</span>
+          </nav>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-semibold tracking-tight mb-8">
+      <main className="max-w-6xl mx-auto px-8 py-16 flex-1 w-full">
+        <h1 className="font-serif text-4xl md:text-5xl tracking-tight mb-12">
           Scan History
         </h1>
 
         {/* Loading State */}
         {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block w-8 h-8 border-3 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
-            <p className="mt-4 text-neutral-600">Loading history...</p>
+          <div className="py-24 text-center">
+            <div className="inline-block w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+            <p className="mt-6 text-black/50 tracking-wide">Loading history...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
-            {error}
+          <div className="py-4 px-5 border border-black/20 bg-black/5">
+            <p className="text-sm">{error}</p>
           </div>
         )}
 
         {/* Empty State */}
         {!loading && !error && scans.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-neutral-600">No scans yet.</p>
+          <div className="py-24 text-center">
+            <p className="text-black/50 mb-6">No scans yet</p>
             <Link
               href="/"
-              className="inline-block mt-4 px-4 py-2 rounded-lg bg-neutral-900 text-white font-medium hover:bg-neutral-800"
+              className="inline-block px-6 py-3 bg-black text-white text-sm uppercase tracking-widest hover:bg-black/80"
             >
               Scan a website
             </Link>
@@ -76,26 +79,46 @@ export default function HistoryPage() {
 
         {/* Scan List */}
         {!loading && !error && scans.length > 0 && (
-          <div className="space-y-3">
-            {scans.map((scan) => (
-              <Link
-                key={scan.id}
-                href={`/scan/${scan.id}`}
-                className="block p-4 rounded-lg border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-blue-600 truncate max-w-[70%]">
-                    {scan.url}
-                  </span>
-                  <span className="text-sm text-neutral-400">
-                    {new Date(scan.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </Link>
-            ))}
+          <div className="divide-y divide-black/10">
+            {scans.map((scan) => {
+              const hostname = (() => {
+                try {
+                  return new URL(scan.url).hostname;
+                } catch {
+                  return scan.url;
+                }
+              })();
+
+              return (
+                <Link
+                  key={scan.id}
+                  href={`/scan/${scan.id}`}
+                  className="block py-6 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-serif text-xl group-hover:underline underline-offset-4">
+                        {hostname}
+                      </p>
+                      <p className="text-sm text-black/40 mt-1">{scan.url}</p>
+                    </div>
+                    <span className="text-sm text-black/40">
+                      {new Date(scan.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-black/10 mt-auto">
+        <div className="max-w-6xl mx-auto px-8 py-8 text-center text-xs text-black/40 tracking-wide uppercase">
+          Cloudflare Browser Rendering + Workers + D1
+        </div>
+      </footer>
     </div>
   );
 }

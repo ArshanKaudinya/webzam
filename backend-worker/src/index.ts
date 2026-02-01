@@ -34,14 +34,29 @@ function generateId(): string {
   return crypto.randomUUID();
 }
 
+// Normalize URL - add https:// if missing
+function normalizeUrl(input: string): string {
+  let url = input.trim();
+
+  // If no protocol, add https://
+  if (!url.match(/^https?:\/\//i)) {
+    url = 'https://' + url;
+  }
+
+  return url;
+}
+
 async function handleScan(request: Request, env: Env): Promise<Response> {
   try {
     const body = await request.json() as { url?: string };
-    const url = body.url;
+    let url = body.url;
 
     if (!url || typeof url !== 'string') {
       return errorResponse('Missing or invalid URL', 400);
     }
+
+    // Normalize URL (add https:// if missing)
+    url = normalizeUrl(url);
 
     // Validate URL
     let parsedUrl: URL;

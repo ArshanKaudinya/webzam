@@ -36,14 +36,70 @@ export interface VibeSlice {
   heroSubheading: string | null;
   primaryCTA: string | null;
   navLabels: string[];
+  metaDescription: string | null;
+  pageTitle: string | null;
+  allHeadings: string[];
+  featureDescriptions: string[];
+  testimonials: string[];
+  footerLinks: string[];
+  socialProof: string[];
+  pricingHints: string[];
+  ctaTexts: string[];
+}
+
+export interface VibeTone {
+  primary: string;
+  secondary: string;
+  voice_characteristics: string[];
+}
+
+export interface VibeAudience {
+  primary_segment: string;
+  demographics: string;
+  psychographics: string;
+  sophistication_level: string;
+}
+
+export interface VibeValueProposition {
+  core_promise: string;
+  key_benefits: string[];
+  differentiator: string;
+}
+
+export interface VibePersonality {
+  archetype: string;
+  traits: string[];
+  human_description: string;
+}
+
+export interface VibeAesthetic {
+  style: string[];
+  mood: string;
+  design_era: string;
+  polish_level: string;
+}
+
+export interface VibeMarket {
+  industry: string;
+  business_model: string;
+  price_tier: string;
+  competitive_position: string;
+}
+
+export interface VibeSummary {
+  one_liner: string;
+  elevator_pitch: string;
+  keywords: string[];
 }
 
 export interface VibeResult {
-  tone: string;
-  audience: string[];
-  positioning: string;
-  aesthetic_style: string[];
-  summary: string;
+  tone: VibeTone;
+  audience: VibeAudience;
+  value_proposition: VibeValueProposition;
+  personality: VibePersonality;
+  aesthetic: VibeAesthetic;
+  market: VibeMarket;
+  summary: VibeSummary;
   confidence: number;
   provider: string;
 }
